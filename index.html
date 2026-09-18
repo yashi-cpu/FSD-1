@@ -13,356 +13,176 @@
             theme: {
                 extend: {
                     colors: {
-                        neon: "#39ff14",
-                        dark: "#050805",
-                        panel: "#0a110a"
-                    },
-                    fontFamily: {
-                        mono: ["Courier New", "monospace"]
-                    },
-                    boxShadow: {
-                        glow: "0 0 25px rgba(57, 255, 20, 0.2)"
+                        dark: "#0f172a",
+                        blue: "#2563eb"
                     }
                 }
-            }
+            },
+            plugins: [
+                function({ addVariant }) {
+                    addVariant('prose', '&')
+                }
+            ]
         }
     </script>
-
-    <style>
-        body {
-            background-color: #050805;
-            background-image:
-                linear-gradient(rgba(57, 255, 20, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(57, 255, 20, 0.03) 1px, transparent 1px);
-            background-size: 40px 40px;
-        }
-
-        .glow {
-            text-shadow: 0 0 12px rgba(57, 255, 20, 0.8);
-        }
-
-        .terminal-line::before {
-            content: "> ";
-            color: #39ff14;
-        }
-
-        .scan {
-            animation: blink 1.2s infinite;
-        }
-
-        @keyframes blink {
-            50% {
-                opacity: 0.4;
-            }
-        }
-    </style>
 </head>
 
-<body class="text-gray-300 font-mono">
+<body class="bg-slate-50 text-slate-800">
 
-    <header class="border-b border-green-900 bg-black/90 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-6 py-5 flex flex-col md:flex-row items-center justify-between gap-5">
-
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 border border-neon flex items-center justify-center text-neon font-bold shadow-glow">
-                    &
-                </div>
-
-                <div>
-                    <h1 class="text-xl font-bold text-white glow">SOC-AI</h1>
-                    <p class="text-xs text-green-700">SECURITY OPERATIONS // AI</p>
-                </div>
+    <header class="bg-slate-900 text-white">
+        <div class="max-w-7xl mx-auto px-6 py-5 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div>
+                <h1 class="text-2xl font-bold">SOC-AI</h1>
+                <p class="text-sm text-slate-400">AI-Powered Cybersecurity Scanner</p>
             </div>
 
             <nav>
-                <ul class="flex flex-wrap justify-center gap-6 text-sm">
-                    <li>
-                        <a href="#home" class="text-neon hover:text-white transition">HOME</a>
-                    </li>
-                    <li>
-                        <a href="#features" class="hover:text-neon transition">FEATURES</a>
-                    </li>
-                    <li>
-                        <a href="#scanner" class="hover:text-neon transition">SCANNER</a>
-                    </li>
-                    <li>
-                        <a href="#about" class="hover:text-neon transition">ABOUT</a>
-                    </li>
+                <ul class="flex gap-6 text-sm">
+                    <li><a href="#home" class="hover:text-blue-400">Home</a></li>
+                    <li><a href="#features" class="hover:text-blue-400">Features</a></li>
+                    <li><a href="#working" class="hover:text-blue-400">How It Works</a></li>
+                    <li><a href="#about" class="hover:text-blue-400">About</a></li>
                 </ul>
             </nav>
-
-            <div class="hidden lg:flex items-center gap-2 text-xs text-green-500">
-                <span class="w-2 h-2 rounded-full bg-neon shadow-glow"></span>
-                SYSTEM ONLINE
-            </div>
-
         </div>
     </header>
 
     <main>
 
-        <section id="home" class="min-h-[90vh] flex items-center">
-            <div class="max-w-7xl mx-auto px-6 py-20 w-full">
+        <section id="home" class="bg-slate-900 text-white">
+            <div class="max-w-7xl mx-auto px-6 py-20 text-center">
+                <span class="inline-block bg-blue-600/20 text-blue-400 px-4 py-2 rounded-full text-sm mb-6">
+                    AI + Cybersecurity
+                </span>
 
-                <div class="grid lg:grid-cols-2 gap-16 items-center">
+                <h2 class="text-4xl md:text-6xl font-bold leading-tight mb-6">
+                    Secure Your Code with
+                    <span class="text-blue-500"> AI</span>
+                </h2>
 
-                    <div>
+                <p class="max-w-2xl mx-auto text-slate-300 text-lg mb-8">
+                    SOC-AI analyzes your source code and identifies potential
+                    vulnerabilities, security threats and suspicious patterns.
+                </p>
 
-                        <div class="inline-flex items-center gap-2 border border-green-900 bg-green-950/20 px-4 py-2 text-xs text-neon mb-8">
-                            <span class="w-2 h-2 bg-neon rounded-full scan"></span>
-                            THREAT DETECTION ENGINE ACTIVE
-                        </div>
-
-                        <p class="text-green-700 text-sm mb-4 terminal-line">
-                            INITIALIZING SECURITY PROTOCOL
-                        </p>
-
-                        <h2 class="text-5xl md:text-7xl font-bold text-white leading-tight mb-6">
-                            CODE
-                            <span class="text-neon glow">SECURED.</span>
-                            <br>
-                            THREATS
-                            <span class="text-green-700">DETECTED.</span>
-                        </h2>
-
-                        <p class="text-gray-500 max-w-xl text-base md:text-lg leading-8 mb-8">
-                            SOC-AI analyzes your source code using artificial intelligence
-                            and security analysis techniques to identify potential
-                            vulnerabilities before they become a problem.
-                        </p>
-
-                        <div class="flex flex-col sm:flex-row gap-4">
-
-                            <a href="#scanner"
-                               class="bg-neon text-black px-7 py-3 font-bold text-sm text-center hover:bg-white transition shadow-glow">
-                                [ START SCAN ]
-                            </a>
-
-                            <a href="#features"
-                               class="border border-green-900 text-neon px-7 py-3 text-sm text-center hover:border-neon transition">
-                                VIEW FEATURES
-                            </a>
-
-                        </div>
-
-                    </div>
-
-                    <div class="border border-green-900 bg-black/80 shadow-glow">
-
-                        <div class="border-b border-green-900 px-5 py-3 flex justify-between text-xs">
-                            <span class="text-gray-500">soc_ai_terminal</span>
-                            <span class="text-neon">● LIVE</span>
-                        </div>
-
-                        <div class="p-6 space-y-4 text-sm">
-
-                            <p class="text-green-700">
-                                root@soc-ai:~$ ./security_scan
-                            </p>
-
-                            <p class="text-gray-500">
-                                Loading security engine...
-                            </p>
-
-                            <p class="text-gray-400">
-                                [<span class="text-neon">OK</span>] Code analyzer loaded
-                            </p>
-
-                            <p class="text-gray-400">
-                                [<span class="text-neon">OK</span>] Threat detection loaded
-                            </p>
-
-                            <p class="text-gray-400">
-                                [<span class="text-neon">OK</span>] AI model loaded
-                            </p>
-
-                            <div class="border-t border-green-950 my-5"></div>
-
-                            <div class="grid grid-cols-2 gap-4">
-
-                                <div class="border border-green-950 p-4">
-                                    <p class="text-gray-600 text-xs">FILES SCANNED</p>
-                                    <p class="text-2xl text-white mt-2">128</p>
-                                </div>
-
-                                <div class="border border-green-950 p-4">
-                                    <p class="text-gray-600 text-xs">THREATS</p>
-                                    <p class="text-2xl text-neon mt-2">03</p>
-                                </div>
-
-                                <div class="border border-green-950 p-4">
-                                    <p class="text-gray-600 text-xs">RISK LEVEL</p>
-                                    <p class="text-2xl text-yellow-500 mt-2">MED</p>
-                                </div>
-
-                                <div class="border border-green-950 p-4">
-                                    <p class="text-gray-600 text-xs">CONFIDENCE</p>
-                                    <p class="text-2xl text-white mt-2">94%</p>
-                                </div>
-
-                            </div>
-
-                            <p class="text-green-700 pt-3">
-                                root@soc-ai:~$ <span class="text-neon scan">_</span>
-                            </p>
-
-                        </div>
-                    </div>
-
-                </div>
+                <button class="bg-blue-600 hover:bg-blue-700 px-7 py-3 rounded-lg font-semibold transition">
+                    Scan Your Project
+                </button>
             </div>
         </section>
 
-        <section id="features" class="border-t border-green-950 py-20">
-
-            <div class="max-w-7xl mx-auto px-6">
-
-                <div class="mb-12">
-                    <p class="text-neon text-sm mb-3">// SECURITY MODULES</p>
-                    <h2 class="text-3xl md:text-4xl text-white font-bold">
-                        Built to find what others miss.
-                    </h2>
-                </div>
-
-                <div class="grid md:grid-cols-3 gap-5">
-
-                    <article class="border border-green-950 bg-panel p-7 hover:border-neon transition">
-                        <div class="text-neon text-2xl mb-6">01</div>
-                        <h3 class="text-white text-xl font-bold mb-4">
-                            Vulnerability Detection
-                        </h3>
-                        <p class="text-gray-500 leading-7 text-sm">
-                            Detect potentially dangerous patterns and common
-                            vulnerabilities hidden inside your source code.
-                        </p>
-                    </article>
-
-                    <article class="border border-green-950 bg-panel p-7 hover:border-neon transition">
-                        <div class="text-neon text-2xl mb-6">02</div>
-                        <h3 class="text-white text-xl font-bold mb-4">
-                            AI Code Analysis
-                        </h3>
-                        <p class="text-gray-500 leading-7 text-sm">
-                            Machine learning models analyze code patterns and
-                            identify suspicious or unusual behavior.
-                        </p>
-                    </article>
-
-                    <article class="border border-green-950 bg-panel p-7 hover:border-neon transition">
-                        <div class="text-neon text-2xl mb-6">03</div>
-                        <h3 class="text-white text-xl font-bold mb-4">
-                            Risk Assessment
-                        </h3>
-                        <p class="text-gray-500 leading-7 text-sm">
-                            Security findings are organized by severity to help
-                            developers understand which issues need attention.
-                        </p>
-                    </article>
-
-                </div>
-
+        <section id="features" class="max-w-7xl mx-auto px-6 py-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-slate-900">Key Features</h2>
+                <p class="text-slate-500 mt-3">
+                    Simple tools to make code security easier.
+                </p>
             </div>
 
-        </section>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-        <section id="scanner" class="border-t border-green-950 py-20">
-
-            <div class="max-w-5xl mx-auto px-6">
-
-                <div class="border border-green-900 bg-black p-8 md:p-12 text-center shadow-glow">
-
-                    <p class="text-neon text-sm mb-4">
-                        // SECURE PROJECT ANALYSIS
+                <article class="bg-white p-7 rounded-xl shadow-sm border border-slate-200">
+                    <div class="text-3xl mb-4">🔍</div>
+                    <h3 class="text-xl font-semibold mb-3">Vulnerability Detection</h3>
+                    <p class="text-slate-600">
+                        Finds common security weaknesses and potentially unsafe
+                        code patterns in your project.
                     </p>
+                </article>
 
-                    <h2 class="text-3xl md:text-5xl font-bold text-white mb-5">
-                        Ready to scan your code?
-                    </h2>
-
-                    <p class="text-gray-500 max-w-2xl mx-auto leading-7 mb-8">
-                        Upload your project and let SOC-AI inspect your source
-                        code for potential security vulnerabilities.
+                <article class="bg-white p-7 rounded-xl shadow-sm border border-slate-200">
+                    <div class="text-3xl mb-4">🤖</div>
+                    <h3 class="text-xl font-semibold mb-3">AI-Based Analysis</h3>
+                    <p class="text-slate-600">
+                        Uses machine learning techniques to analyze source code
+                        and identify suspicious patterns.
                     </p>
+                </article>
 
-                    <div class="border border-dashed border-green-800 p-10 mb-7">
-
-                        <div class="text-4xl text-green-800 mb-4">
-                            [ ZIP ]
-                        </div>
-
-                        <p class="text-gray-400 text-sm mb-2">
-                            DROP YOUR PROJECT HERE
-                        </p>
-
-                        <p class="text-gray-700 text-xs">
-                            Supported format: .ZIP
-                        </p>
-
-                    </div>
-
-                    <button class="bg-neon text-black px-8 py-3 font-bold hover:bg-white transition">
-                        UPLOAD & SCAN
-                    </button>
-
-                </div>
-
-            </div>
-
-        </section>
-
-        <section id="about" class="border-t border-green-950 py-20">
-
-            <div class="max-w-4xl mx-auto px-6">
-
-                <article class="prose prose-invert max-w-none">
-
-                    <p class="text-neon text-sm">// ABOUT THE SYSTEM</p>
-
-                    <h2 class="text-white text-3xl font-bold mt-4">
-                        Security that starts with the code.
-                    </h2>
-
-                    <p class="text-gray-500 leading-8">
-                        SOC-AI is an AI-powered cybersecurity platform designed
-                        to help developers identify potential security threats
-                        in their projects. The system combines source-code
-                        analysis with machine learning to provide developers
-                        with understandable security findings.
+                <article class="bg-white p-7 rounded-xl shadow-sm border border-slate-200">
+                    <div class="text-3xl mb-4">🛡️</div>
+                    <h3 class="text-xl font-semibold mb-3">Security Reports</h3>
+                    <p class="text-slate-600">
+                        Provides understandable results so developers can
+                        quickly identify and fix security issues.
                     </p>
-
                 </article>
 
             </div>
+        </section>
 
+        <section id="working" class="bg-slate-100 py-16">
+            <div class="max-w-5xl mx-auto px-6">
+
+                <div class="prose lg:prose-xl max-w-none">
+                    <h2>How SOC-AI Works</h2>
+                    <p>
+                        SOC-AI follows a simple process to analyze a software
+                        project and identify possible security threats.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-10">
+
+                    <div class="bg-white p-6 rounded-lg text-center shadow-sm">
+                        <div class="text-blue-600 text-2xl font-bold mb-2">01</div>
+                        <h3 class="font-semibold">Upload</h3>
+                        <p class="text-sm text-slate-500 mt-2">
+                            Upload your project files or ZIP folder.
+                        </p>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg text-center shadow-sm">
+                        <div class="text-blue-600 text-2xl font-bold mb-2">02</div>
+                        <h3 class="font-semibold">Analyze</h3>
+                        <p class="text-sm text-slate-500 mt-2">
+                            The system examines the source code.
+                        </p>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg text-center shadow-sm">
+                        <div class="text-blue-600 text-2xl font-bold mb-2">03</div>
+                        <h3 class="font-semibold">Detect</h3>
+                        <p class="text-sm text-slate-500 mt-2">
+                            Potential vulnerabilities are identified.
+                        </p>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg text-center shadow-sm">
+                        <div class="text-blue-600 text-2xl font-bold mb-2">04</div>
+                        <h3 class="font-semibold">Report</h3>
+                        <p class="text-sm text-slate-500 mt-2">
+                            Security findings are displayed clearly.
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <section id="about" class="max-w-5xl mx-auto px-6 py-16 text-center">
+            <h2 class="text-3xl font-bold text-slate-900 mb-5">About SOC-AI</h2>
+            <p class="text-slate-600 leading-7 max-w-3xl mx-auto">
+                SOC-AI is designed to help developers detect cybersecurity
+                vulnerabilities during the development process. By combining
+                web technologies with artificial intelligence and machine
+                learning, the platform aims to make source code security
+                analysis faster and easier.
+            </p>
         </section>
 
     </main>
 
-    <footer class="border-t border-green-950 bg-black">
-
-        <div class="max-w-7xl mx-auto px-6 py-8">
-
-            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-
-                <div>
-                    <p class="text-white font-bold">SOC-AI</p>
-                    <p class="text-gray-700 text-xs mt-1">
-                        AI-POWERED CYBERSECURITY
-                    </p>
-                </div>
-
-                <p class="text-gray-700 text-xs">
-                    © 2026 SOC-AI // ALL SYSTEMS SECURED
-                </p>
-
-                <p class="text-green-800 text-xs">
-                    STATUS: ONLINE ●
-                </p>
-
-            </div>
-
+    <footer class="bg-slate-900 text-white">
+        <div class="max-w-7xl mx-auto px-6 py-8 text-center">
+            <h3 class="font-semibold text-lg">SOC-AI</h3>
+            <p class="text-slate-400 text-sm mt-2">
+                AI-Powered Cybersecurity Scanner
+            </p>
+            <p class="text-slate-500 text-sm mt-4">
+                © 2026 SOC-AI. All rights reserved.
+            </p>
         </div>
-
     </footer>
 
 </body>
