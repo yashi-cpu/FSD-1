@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LocateInMyLanguage</title>
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script id="tw-config">
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            paper: '#131517', card: '#1c1f22', ink: '#ecebe6', muted: '#9aa0a3', line: '#34393d',
+            pine: '#d9a441', pinedark: '#b8872c', brass: '#d9a441', brassdark: '#e3b659',
+            sand: '#2b2519', rust: '#e08a7c', clay: '#2e1d1b'
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    :root {
+      color-scheme: dark;
+    }
+
+    input,
+    select {
+      background: #131517;
+      color: #ecebe6;
+    }
+
+    input::placeholder {
+      color: #6d7377;
+    }
+
+    .contours {
+      background-color: #1c1f22;
+      border: 1px solid #34393d;
+      background-image: repeating-radial-gradient(circle at 90% 140%, transparent 0, transparent 16px, rgba(217, 164, 65, .10) 17px, rgba(217, 164, 65, .10) 18px);
+    }
+
+    .maplibregl-map {
+      background: #131517;
+      border-radius: .75rem;
+    }
+
+    .maplibregl-ctrl-group {
+      background: #1c1f22;
+      border-color: #34393d;
+    }
+
+    .maplibregl-ctrl-group button {
+      filter: invert(.85);
+    }
+
+    .maplibregl-ctrl-attrib {
+      background: rgba(19, 21, 23, .85) !important;
+      color: #9aa0a3;
+    }
+
+    .maplibregl-ctrl-attrib a {
+      color: #d9a441;
+    }
+
+    .maplibregl-marker {
+      z-index: 5;
+    }
+
+    /* callout: badge, leader line, label */
+    .callout {
+      position: relative;
+      width: 240px;
+      height: 74px;
+      pointer-events: none;
+    }
+
+    .callout .badge {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #d9a441;
+      color: #131517;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      box-shadow: 0 0 0 4px rgba(217, 164, 65, .25);
+    }
+
+    .callout .stem {
+      position: absolute;
+      left: 14px;
+      top: 30px;
+      width: 2px;
+      height: 44px;
+      background: #d9a441;
+    }
+
+    .callout .lbl {
+      position: absolute;
+      left: 40px;
+      top: 0;
+      max-width: 195px;
+      color: #ecebe6;
+      font: 600 14px/1.25 ui-sans-serif, system-ui, sans-serif;
+      text-shadow: 0 1px 3px #000;
+    }
+
+    .callout .lbl small {
+      display: block;
+      color: #d9a441;
+      font-size: 10.5px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+  </style>
+  <script src="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.js"></script>
+</head>
+
+<body class="bg-paper text-ink">
+  <main class="max-w-5xl mx-auto p-4 sm:p-8">
+    <header class="contours text-white rounded-2xl px-6 py-7 mb-6 shadow">
+      <h1 class="fo
+    nt-serif text-3xl font-semibold tracking-tight">LocateInMyLanguage</h1>
+      <p class="mt-1 text-white/80 max-w-xl">Search a place or coordinates, see one clear result, and read its name in
+        your language.</p>
+    </header>
+    <div class="grid md:grid-cols-2 gap-5">
+      <div>
+        <form id="form" class="bg-card border border-line rounded-xl shadow-sm p-4 space-y-3" novalidate>
+          <label for="q" class="block font-medium">Place name or coordinates (latitude, longitude)</label>
+          <input id="q" type="text" autocomplete="off"
+            placeholder="Holy Child School Ghaziabad, or 28.6499526, 77.4173017"
+            class="w-full border border-line rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pine">
+          <p id="hint" class="text-sm text-muted" aria-live="polite">Enter at least 3 characters.</p>
+          <label for="lang" class="block font-medium">Show names in</label>
+          <select id="lang" class="w-full border border-line rounded-lg px-3 py-2"></select>
+          <button id="go" type="submit"
+            class="bg-pine hover:bg-pinedark disabled:opacity-50 text-paper font-medium rounded-lg px-4 py-2">Locate</button>
+        </form>
+        <section id="out" class="mt-4" aria-live="polite"></section>
+        <section class="mt-4">
+          <h2 class="font-serif font-semibold text-lg">Recent searches</h2>
+          <ul id="history" class="mt-1 text-sm space-y-1"></ul>
+        </section>
+      </div>
+      <div>
+        <div id="map" class="rounded-xl border border-line shadow-sm h-80 md:h-[32rem] bg-line"></div>
+        <p class="text-xs text-muted mt-1">City, state, country, and road labels switch to your selected language
+          wherever translated names are available in the map data.</p>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const $ = id => document.getElementById(id);
+    const LANGS = { en: 'English', zh: '中文 (Chinese)', hi: 'हिन्दी (Hindi)', kn: 'ಕನ್ನಡ (Kannada)', ta: 'தமிழ் (Tamil)', ja: '日本語 (Japanese)', ar: 'العربية (Arabic)', es: 'Español', fr: 'Français' };
+    const q = $('q'), hint = $('hint'), out = $('out'), lang = $('lang'), hist = $('history');
+    const recent = [];
+    let current = null, marker = null, pointDot = null, featureDot = null, routeLine = null, placeBounds = null;
+
+    lang.innerHTML = Object.entries(LANGS).map(([k, v]) => `<option value="${k}">${v}</option>`).join('');
+
+    const map = new maplibregl.Map({
+      container: 'map',
+      style: 'https://tiles.openfreemap.org/styles/liberty',
+      center: [78.9, 20.5],
+      zoom: 4,
+      attributionControl: true
+    });
+    map.addControl(new maplibregl.NavigationControl(), 'top-right');
+
+    function applyMapLanguage(code) {
+      if (!map.isStyleLoaded()) return;
+      for (const layer of map.getStyle().layers) {
+        if (layer.type !== 'symbol' || !layer.layout || !layer.layout['text-field']) continue;
+        map.setLayoutProperty(layer.id, 'text-field', [
+          'coalesce',
+          ['get', 'name:' + code],
+          ['get', 'name']
+        ]);
+      }
+    }
+    map.on('load', () => applyMapLanguage(lang.value));
+
+    const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+    // Parses "lat, lon". Auto-corrects a pair that is clearly reversed (first value above 90).
+    function parseCoords(t) {
+      const m = t.trim().match(/^(-?\d+(?:\.\d+)?)\s*[,;\s]\s*(-?\d+(?:\.\d+)?)$/);
+      if (!m) return null;
+      let a = +m[1], b = +m[2], note = '';
+      if (Math.abs(a) > 90 && Math.abs(b) <= 90) { [a, b] = [b, a]; note = 'The values looked reversed, so latitude and longitude were swapped.'; }
+      if (Math.abs(a) > 90 || Math.abs(b) > 180) return { error: 'Latitude must be -90 to 90 and longitude -180 to 180.' };
+      return { lat: a, lon: b, note };
+    }
+    function validate(t) {
+      if (!t.trim()) return 'Type a place name or coordinates first.';
+      const c = parseCoords(t);
+      if (c && c.error) return c.error;
+      if (!c && t.trim().length < 3) return 'Enter at least 3 characters.';
+      return '';
+    }
+
+    // Event 1: live validation
+    q.addEventListener('input', () => {
+      const e = validate(q.value);
+      hint.textContent = e || (parseCoords(q.value) ? 'Coordinates detected (latitude first).' : 'Looks good. Press Locate.');
+      hint.className = 'text-sm ' + (e ? 'text-rust' : 'text-pine');
+    });
+    // Event 2: submit
+    $('form').addEventListener('submit', e => {
+      e.preventDefault();
+      const err = validate(q.value);
+      if (err) { hint.textContent = err; hint.className = 'text-sm text-rust'; q.focus(); return; }
+      search(q.value.trim());
+    });
+    // Event 3: changing language refreshes the current result
+    lang.addEventListener('change', () => {
+      applyMapLanguage(lang.value);
+      if (current) search(current.query);
+    });
+
+    let results = [];
+    const dist = (la1, lo1, la2, lo2) => {
+      const r = x => x * Math.PI / 180, dl = r(la2 - la1), dn = r(lo2 - lo1);
+      const h = Math.sin(dl / 2) ** 2 + Math.cos(r(la1)) * Math.cos(r(la2)) * Math.sin(dn / 2) ** 2;
+      return 2 * 6371000 * Math.asin(Math.sqrt(h));
+    };
+
+    const clearMarker = () => {
+      for (const item of [marker, pointDot, featureDot, routeLine]) {
+        if (item) item.remove();
+      }
+      marker = pointDot = featureDot = routeLine = null;
+      if (placeBounds) {
+        try { map.removeLayer('place-outline'); map.removeSource('place-outline'); } catch { }
+        placeBounds = null;
+      }
+    };
+    const calloutElement = (tag, name) => {
+      const el = document.createElement('div');
+      el.className = 'callout';
+      el.innerHTML = `<div class="badge">&#9678;</div><div class="stem"></div><div class="lbl"><small>${esc(tag)}</small>${esc(name)}</div>`;
+      return el;
+    };
+    async function fetchJSON(url) {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Server returned ' + res.status);
+      return res.json();
+    }
+    // Builds simpler versions of a long place name, from most to least specific.
+    function variants(t) {
+      const clean = t.replace(/\(([^)]*)\)/g, ' $1 ').replace(/\s+/g, ' ').replace(/\s+,/g, ',').trim();
+      const short = clean.replace(/\bdeemed to be (a )?universit(y|ies)\b/ig, '').replace(/\s+/g, ' ').replace(/\s+,/g, ',').trim();
+      const parts = short.split(',').map(x => x.trim()).filter(Boolean);
+      const last = parts[parts.length - 1];
+      const list = [t, clean, short];
+      if (/universit/i.test(t) && parts.length > 1) list.push(parts[0] + ' University, ' + last);
+      if (parts.length > 2) list.push(parts[0] + ', ' + last);
+      if (parts.length > 1) list.push(parts.slice(-2).join(', '), last);
+      return [...new Set(list.filter(Boolean))];
+    }
+
+    async function search(text) {
+      out.innerHTML = '<p class="text-muted">Searching OpenStreetMap data…</p>';
+      $('go').disabled = true;
+      clearMarker();
+      const l = lang.value, c = parseCoords(text), base = 'https://nominatim.openstreetmap.org/';
+      try {
+        let note = c && c.note;
+        if (c) {
+          const d = await fetchJSON(`${base}reverse?format=jsonv2&zoom=18&namedetails=1&accept-language=${l}&lat=${c.lat}&lon=${c.lon}`);
+          results = d.error ? [] : [d];
+        } else {
+          results = [];
+          const vs = variants(text);
+          for (let i = 0; i < vs.length && !results.length; i++) {
+            if (i > 0) {
+              out.innerHTML = `<p class="text-muted">No match yet. Trying "${esc(vs[i])}"…</p>`;
+              await new Promise(r => setTimeout(r, 1100)); // stay within Nominatim's rate limit
+            }
+            results = await fetchJSON(`${base}search?format=jsonv2&limit=5&addressdetails=1&namedetails=1&accept-language=${l}&q=${encodeURIComponent(vs[i])}`);
+            if (results.length && i > 0) note = `No exact match for your full text, so these results are for "${vs[i]}". Check that the right one is selected.`;
+          }
+          if (!results.length) {
+            out.innerHTML = `<div class="bg-sand border border-brass rounded-xl p-4"><p class="font-medium">No place found for "${esc(text)}".</p>
+          <p class="text-sm mt-1">OSM may not have this place mapped under that name. Try a shorter name with the city, or enter coordinates as latitude, longitude.</p></div>`;
+            return;
+          }
+        }
+        current = { query: text, note, exact: c ? { lat: c.lat, lon: c.lon } : null };
+        pick(0);
+        addHistory(text);
+      } catch (err) {
+        out.innerHTML = `<div class="bg-clay border border-rust rounded-xl p-4"><p class="font-medium">Search failed.</p>
+      <p class="text-sm mt-1">${esc(err.message)}. Check your connection and try again.</p></div>`;
+      } finally { $('go').disabled = false; }
+    }
+
+    function pick(i) {
+      const p = results[i] || null;
+      current.lat = current.exact ? current.exact.lat : +p.lat;
+      current.lon = current.exact ? current.exact.lon : +p.lon;
+      show(p, lang.value, current.note, i);
+    }
+
+    function show(p, l, note, idx) {
+      const nd = (p && p.namedetails) || {};
+      const latinName = l === 'en' && nd.name && /^[\x00-\x7F\u00C0-\u024F]+$/.test(nd.name); // plain name already readable in English
+      const langMsg = !p || nd['name:' + l] || !nd.name || latinName ? '' :
+        `<p class="text-sm mt-2 text-brassdark">OSM has no ${esc(LANGS[l])} name for this place. Showing the closest available name.</p>`;
+      const local = p && nd.name && nd.name !== p.name ? `<p class="text-sm mt-1">Local name: ${esc(nd.name)}</p>` : '';
+      const kind = p ? [p.category, p.type].filter(Boolean).join(' / ') : '';
+      const oneWord = !current.exact && current.query.trim().split(/\s+/).length === 1;
+      const tip = p && oneWord && !['place', 'boundary'].includes(p.category)
+        ? '<p class="text-sm mt-1 text-brassdark">This matched a business or feature, not a city or region. If you meant a city, check the spelling.</p>' : '';
+      const typeLine = p ? `<p class="text-xs text-muted mt-1">Type: ${esc(kind)}</p>${tip}` : '';
+      let title = p ? p.display_name : 'No mapped feature found near this point';
+      let near = '';
+      if (p && current.exact) {
+        const d = Math.round(dist(current.lat, current.lon, +p.lat, +p.lon));
+        near = `<p class="text-sm mt-1 text-muted">Nearest mapped feature, about ${d} m from your point.</p>`;
+      }
+      const others = results.length > 1 ? `<div class="mt-3"><p class="text-sm font-medium">Other matches. Choose the right one:</p>
+    <ul class="mt-1 space-y-1 text-sm">${results.map((r, i) => i === idx ? '' :
+        `<li><button data-act="pick" data-i="${i}" class="text-pine underline text-left">${esc(r.display_name)}</button></li>`).join('')}</ul></div>` : '';
+      out.innerHTML = `<article class="bg-card border border-line border-l-4 border-l-brass rounded-xl shadow-sm p-4">
+    <h3 class="font-serif text-lg font-semibold leading-snug">${esc(title)}</h3>${local}${typeLine}${near}${langMsg}
+    ${note ? `<p class="text-sm mt-2 text-pine">${esc(note)}</p>` : ''}
+    <dl class="grid grid-cols-2 gap-2 text-sm mt-3">
+      <div><dt class="text-muted">Latitude${current.exact ? ' (your point)' : ''}</dt><dd class="font-medium">${current.lat.toFixed(6)}</dd></div>
+      <div><dt class="text-muted">Longitude${current.exact ? ' (your point)' : ''}</dt><dd class="font-medium">${current.lon.toFixed(6)}</dd></div>
+    </dl>
+    <div class="flex flex-wrap gap-2 mt-3">
+      <button data-act="swap" class="border border-pine text-pine rounded-lg px-3 py-2 text-sm">Swap latitude and longitude</button>
+      <button data-act="copy" class="border border-pine text-pine rounded-lg px-3 py-2 text-sm">Copy coordinates</button>
+      <button data-act="edit" class="bg-ink text-paper font-medium rounded-lg px-3 py-2 text-sm">Edit this spot in OSM</button>
+    </div>${others}</article>`;
+      const pos = [current.lon, current.lat];
+      clearMarker();
+      const label = (p && (p.name || p.display_name.split(',')[0])) || 'Your point';
+      marker = new maplibregl.Marker({ element: calloutElement(current.exact ? 'Your point' : 'Searched place', label), anchor: 'bottom' })
+        .setLngLat(pos).addTo(map);
+      pointDot = new maplibregl.Marker({ color: '#d9a441', scale: 0.65 }).setLngLat(pos).addTo(map);
+      if (p && current.exact) {
+        const f = [+p.lon, +p.lat];
+        featureDot = new maplibregl.Marker({ color: '#ecebe6', scale: 0.45 }).setLngLat(f).addTo(map);
+        map.addSource('point-route', { type: 'geojson', data: { type: 'Feature', geometry: { type: 'LineString', coordinates: [pos, f] }, properties: {} } });
+        map.addLayer({
+          id: 'point-route', type: 'line', source: 'point-route',
+          paint: { 'line-color': '#d9a441', 'line-width': 3, 'line-dasharray': [1, 2] }
+        });
+        routeLine = { remove: () => { try { map.removeLayer('point-route'); map.removeSource('point-route'); } catch { } } };
+      }
+      const bb = p && !current.exact && p.boundingbox;
+      if (bb) {
+        const bounds = [[+bb[2], +bb[0]], [+bb[3], +bb[1]]];
+        placeBounds = true;
+        map.addSource('place-outline', {
+          type: 'geojson',
+          data: {
+            type: 'Feature', geometry: {
+              type: 'Polygon', coordinates: [[
+                [bounds[0][0], bounds[0][1]], [bounds[1][0], bounds[0][1]],
+                [bounds[1][0], bounds[1][1]], [bounds[0][0], bounds[1][1]],
+                [bounds[0][0], bounds[0][1]]
+              ]]
+            }, properties: {}
+          }
+        });
+        map.addLayer({
+          id: 'place-outline', type: 'line', source: 'place-outline',
+          paint: { 'line-color': '#d9a441', 'line-width': 2, 'line-opacity': 0.85 }
+        });
+        map.fitBounds(bounds, { maxZoom: 18, padding: 50, duration: 800 });
+      } else map.flyTo({ center: pos, zoom: 18 });
+    }
+
+    // Event 4: delegated clicks for result buttons
+    out.addEventListener('click', async e => {
+      const b = e.target.closest('button[data-act]');
+      if (!b || !current) return;
+      if (b.dataset.act === 'pick') { pick(+b.dataset.i); return; }
+      const { lat, lon } = current;
+      if (b.dataset.act === 'swap') { q.value = `${lon}, ${lat}`; search(q.value); }
+      if (b.dataset.act === 'edit') window.open(`https://www.openstreetmap.org/edit?editor=id#map=18/${lat}/${lon}`, '_blank');
+      if (b.dataset.act === 'copy') {
+        try { await navigator.clipboard.writeText(`${lat}, ${lon}`); b.textContent = 'Copied'; } catch { b.textContent = 'Copy failed'; }
+      }
+    });
+
+    function addHistory(t) {
+      if (!recent.includes(t)) { recent.unshift(t); if (recent.length > 5) recent.pop(); }
+      hist.innerHTML = recent.map(r => `<li><button class="text-pine underline" data-h="${esc(r)}">${esc(r)}</button></li>`).join('');
+    }
+    // Event 5: re-run a recent search
+    hist.addEventListener('click', e => { const t = e.target.dataset.h; if (t) { q.value = t; search(t); } });
+    hist.innerHTML = '<li class="text-muted">No searches yet.</li>';
+  </script>
+</body>
+
+</html>
